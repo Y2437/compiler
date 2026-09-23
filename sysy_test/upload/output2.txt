@@ -1,0 +1,18 @@
+24373169
+input values: 6 9
+while loop: 22 16 13
+unary minus: -22
+unary plus: 13
+mixed priority: 28
+paren priority: 456
+else match: 2
+nested if: 3
+multi params: 22
+identity call: 22
+block item: 44
+nested block: 88
+continue break: 5
+not on var: 3
+not on paren: 3
+input compute: 76
+mixed grouped: 484

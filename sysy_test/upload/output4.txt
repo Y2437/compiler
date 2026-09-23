@@ -1,0 +1,17 @@
+24373169
+input values: 1 b
+array add: 10 10 10
+swap inline: 10 10
+weighted sum: 150
+array pick: y
+case block: 10
+char switch: d
+while continue break: 13 8
+single stmt while: 4
+char equal: 108
+char not equal: 115
+part init: 1 0 0
+empty init: 0 0
+char to int array: 10 121
+escape char: 10
+menu after switch: 1

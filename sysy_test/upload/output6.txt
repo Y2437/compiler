@@ -1,0 +1,71 @@
+24373169
+get int: 10
+get char: Z
+get string: final line
+part init: 8 0 0
+string pad: 0
+cast length array: 100
+const string: test
+char list init: m o
+empty list init: 0
+static init: 11 0 13
+add sub: 0
+mul div mod: 0
+less than: 1
+greater than: 0
+less equal: 1
+greater equal: 0
+equal: 0
+not equal: 1
+land value: 1
+lor value: 1
+unary minus: -1
+unary plus: 2
+nested paren: 6
+char to int: 97
+int to char: b
+cast add: 195
+cast back: 1
+const array elem: 5
+local const array: 30
+input assign: 15
+array assign: 19
+array chain: 1 3
+int params ret: 34
+array modified: 15
+void params: 17
+one elem param: 17
+char func: Z
+first char: k
+side effect: 1
+block inner: 20
+var index: 7
+if else: 6
+if block: 1
+if single stmt: 1
+else match: 0 2
+while continue break: 9 16
+single stmt while: 2
+int switch: 3
+char switch: m
+empty switch: 6
+and skip: 0
+or skip: 0
+nested logic: 21
+not paren: 21
+input and: 1 22
+static counter: 3 6
+multi format: 6 b kysq
+
+global string: hello
+global const: 66 3 4
+global vars: 1 0 3
+const char: x y z
+global array: 1 0 4
+global char vars: 100 0 102
+const char list: q
+const char string: hello
+global char list: c
+const empty init: 0
+const part init: 7
+final: 22 2 9

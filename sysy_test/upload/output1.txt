@@ -1,0 +1,28 @@
+24373169
+input values: 7 5
+local const: 7 8 9
+add sub: 2
+mul div mod: 0
+less than: 1
+greater than: 0
+less equal: 1
+greater equal: 0
+equal: 0
+not equal: 1
+unary minus: -3
+unary plus: 4
+nested paren: 28
+input mul add: 38
+assign: 9
+func add: 13
+shadow var: 100
+if else result: 1
+if no else: 1
+while break continue: 9 16
+single stmt while: 2
+logical not: 9
+static keep: 4 7
+global vars: 5 3
+input final: 40
+global const more: 3 10
+global zero init: 0 0

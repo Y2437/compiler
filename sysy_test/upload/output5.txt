@@ -1,0 +1,18 @@
+24373169
+input values: 3 9
+and skip: 0
+or skip: 0
+and eval: 1 2
+or eval: 11 2
+nested logic: 2
+land value: 0
+lor value: 1
+while and: 5 3
+while or: 3
+and chain: 3
+or chain: 3
+logic priority: 0 0
+equal cond: 3
+input and: 1 4
+input or: 2 3
+final abc: 4 3 3
