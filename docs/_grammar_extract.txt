@@ -1,0 +1,690 @@
+===== page 1 =====
+2026 编译技术实验⽂法定义及相关说明
+⼀、概要
+SysY 语⾔是编译技术实验所完成的编译器的源语⾔，是  C 语⾔的⼀个⼦集。⼀个  SysY 语⾔源程序⽂件中有
+且仅有⼀个名为  main 的主函数定义，除此之外包含若⼲全局变量声明、常量声明和其他函数定义。 SysY 语⾔
+⽀持  32 位有符号数  int 类型、 8 位⽆符号数  char 类型及其的⼀维数组类型；const 修饰符⽤于声明常量。
+SysY 语⾔本⾝没有提供输⼊ / 输出 (I/O) 的语⾔构造， I/O 是以运⾏时库⽅式提供，库函数可以在  SysY 程序中的
+函数内调⽤。
+函数：函数可以带参数也可以不带参数，参数的类型可以是  int、char 或其⼀维数组类型；函数可以返
+回  int、char 类型的值，或者不返回值（即声明为  void 类型）。当参数为  int 或  char 时，按值传
+递；⽽参数为数组类型时，实际传递的是数组的起始地址。函数体由若⼲变量声明和语句组成。
+变量 / 常量声明：可以在⼀个变量 / 常量声明语句中声明多个变量或常量，声明时可以带初始化表达式。所
+有变量 / 常量要求先定义再使⽤。在函数外声明的为全局变量 / 常量，在函数内声明的为局部变量 / 常量。
+语句：语句包括赋值语句、表达式语句 ( 表达式可以为空 ) 、语句块、if 语句、while 语句、switch 语
+句、break 语句、continue 语句、return 语句。语句块中可以包含若⼲变量声明和语句。
+表达式：⽀持基本的算术运算（+、-、*、/、%）、关系运算（==、!=、<、>、<=、>=）和逻辑运算
+（!、&&、||），⾮  0 表⽰真、 0 表⽰假，⽽关系运算或逻辑运算的结果⽤  1 表⽰真、 0 表⽰假。算符的
+优先级和结合性以及计算规则 ( 含逻辑运算的 “ 短路计算 ”) 与  C 语⾔⼀致。
+⼆、运⾏时库
+源程序可通过  get_int、get_char、get_string 读取输⼊，通过  put_int、put_char、
+put_string、printf 打印输出，相关函数的原型及作⽤如下：
+函数名称 函数原型 函数作⽤
+get_int int get_int();
+从标准输⼊读取⼀⾏，去掉⾸尾的空⽩字符，将剩余部分按⼗
+进制整数的规则解析，保证不出现⽆法解析为⼗进制数字的情
+况，保证不出现到达⽂件末尾（ EOF ）后仍调⽤的情况。该
+函数的⾏为与  MARS 模拟器  5 号系统调⽤（read
+integer）相同。
+get_char char get_char();
+从标准输⼊读取⼀个字符，并返回其  ASCII 码，保证不出现
+到达⽂件末尾（ EOF ）后仍调⽤的情况。该函数的⾏为与
+MARS 模拟器  12 号系统调⽤（read character）相同。
+get_string
+void
+get_string(char*
+buffer, int
+max_len);
+从标准输⼊不超过  max_len - 1 个字符，并将读取到的字
+符存储到  buffer 指向的缓冲区中。当遇到  EOF 或者换⾏符
+时，则停⽌读取。保证不出现到达⽂件末尾（ EOF ）后仍调
+⽤的情况。若读取到换⾏符，则其将存⼊缓冲区中。若
+max_len > 0，则保证函数返回后，buffer 中含有合法的
+以空字符结尾的字符串；若  max_len <= 0，则不执⾏任何
+操作，也不修改  buffer。该函数的⾏为与 MARS 模拟器  8 号
+系统调⽤（read string）相同。
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+1 / 17
+===== page 2 =====
+函数名称 函数原型 函数作⽤
+put_int void put_int(int
+a);
+向标准输出以有符号⼗进制格式打印⼀个整数，不⾃动换⾏。
+该函数的⾏为与  MARS 模拟器  1 号系统调⽤（print
+integer）相同。
+put_char void put_char(char
+a);
+向标准输出打印⼀个字符，不⾃动换⾏。该函数的⾏为与
+MARS 模拟器  11 号系统调⽤（print character）相同。
+put_stringvoid put_str(char
+*str);
+向标准输出打印⼀个字符串，不⾃动换⾏。该函数的⾏为与
+MARS 模拟器  4 号系统调⽤（print string）相同。
+printf 的使⽤⽅法为  'printf' '(' <StringConst> {, <Exp>} ')' ，其中  StringConst 为字符串
+常量终结符，其规范参考第三章⽂法及测试程序覆盖要求的第三⼩节第五部分字符串常量。
+如果希望在  C 语⾔中测试测试程序，请从希冀平台 “ 课程信息 ”--“ 教学资料 ” 中下载  libsysy.zip，引⼊其中的
+libsysy.h 头⽂件。例如：
+#include "libsysy.h"
+int main() {
+    int value = get_int();
+    printf("value = %d\n", value);
+    return 0;
+}
+编译测试程序时，请将其同  libsysy.c ⼀同编译，例如，将上述测试程序保存到  test.c 中，使⽤  gcc 编译
+器：
+gcc test.c libsysy.c -o test
+三、⽂法及测试程序覆盖要求
+1. 覆盖要求
+测试程序是为了测试编译器⽽编写的符合⽂法规则的  SysY 语⾔程序，在实验的 “ ⽂法解读作业 ” 中需要同学们编
+写测试程序。测试程序需覆盖⽂法中所有的语法规则（即每⼀条推导规则的每⼀个候选项都要被覆盖），并满⾜
+⽂法的语义约束（换⽽⾔之，测试程序应该是正确的）。在下⼀节中，⽂法正⽂中以注释形式给出需要覆盖的情
+况。
+2. ⽂法
+SysY 语⾔的⽂法采⽤扩展的  Backus 范式（ EBNF ， Extended Backus-Naur Form ）表⽰，其中：
+符号[...]表⽰⽅括号内包含的为可选项
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+2 / 17
+===== page 3 =====
+符号{...}表⽰花括号内包含的为可重复  0 次或多次的项
+终结符或者是由单引号括起的串，或者是  Ident、IntConst、StringConst 这样的记号
+所有类似  'main' 这样的⽤单引号括起的字符串都是保留的关键字
+ SysY 语⾔的⽂法表⽰如下，其中  CompUnit 为开始符号：
+重要：建议同时对照⽂法第三部分的语义约束。
+编译单元  CompUnit → {Decl} {FuncDef} MainFuncDef // 1. 是否存在 Decl 2. 是否存在
+FuncDef
+声明  Decl → ConstDecl | VarDecl // 覆盖两种声明
+常量声明  ConstDecl → 'const' BType ConstDef { ',' ConstDef } ';' // 1. 花括号内
+重复 0 次  2. 花括号内重复多次 ( 花括号内重复 >=2 次，即，⾄少出现 3 次 ConstDef)
+基本类型  BType → 'int' | 'char' // 覆盖两种基本类型
+常量定义  ConstDef → Ident [ '[' ConstExp ']' ] '=' ConstInitVal // 包含普通变
+量、⼀维数组两种情况
+常量初值  ConstInitVal → ConstExp | '{' [ ConstExp { ',' ConstExp } ] '}' | 
+StringConst // 1. 常表达式初值  2. ⼀维数组初值  3. 字符串初值
+变量声明  VarDecl → [ 'static' ] BType VarDef { ',' VarDef } ';' // 1. 花括号内
+重复 0 次  2. 花括号内重复多次 ( 花括号内重复 >=2 次，即，⾄少出现 3 次 VarDef) 3. static 存在 
+4. static 不存在
+变量定义  VarDef → Ident [ '[' ConstExp ']' ] | Ident [ '[' ConstExp ']' ] 
+'=' InitVal // 包含普通常量、⼀维数组定义
+变量初值  InitVal → Exp | '{' [ Exp { ',' Exp } ] '}' | StringConst // 1. 表达
+式初值  2. ⼀维数组初值  3. 字符串初值
+函数定义  FuncDef → FuncType Ident '(' [FuncFParams] ')' Block // 1. ⽆形参  2. 有
+形参
+主函数定义  MainFuncDef → 'int' 'main' '(' ')' Block // 存在 main 函数
+函数类型  FuncType → 'void' | 'int' | 'char' // 覆盖三种类型的函数
+函数形参表  FuncFParams → FuncFParam { ',' FuncFParam } // 1. 花括号内重复 0 次  2.
+花括号内重复多次 ( 花括号内重复 >=2 次，即，⾄少出现 3 次 FuncFParam)
+函数形参  FuncFParam → BType Ident ['[' ']'] // 1. 普通变量  2. ⼀维数组变量
+语句块  Block → '{' { BlockItem } '}' // 1. 花括号内重复 0 次  2. 花括号内重复多次 ( 花括
+号内重复 >=2 次 )
+语句块项  BlockItem → Decl | Stmt // 覆盖两种语句块项
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+3 / 17
+===== page 4 =====
+语句  Stmt → LVal '=' Exp ';' // 每种类型的语句都要覆盖
+| [Exp] ';' // 有⽆ Exp 两种情况； printf 函数调⽤
+| Block
+| 'if' '(' Cond ')' Stmt [ 'else' Stmt ] // 1. 有 else 2. ⽆ else
+| 'while' '(' Cond ')' Stmt // while 循环语句
+| 'switch' '(' Exp ')' '{' { CaseStmt } '}' // switch 语句，需覆盖不同 case 情况
+| 'break' ';'
+| 'continue' ';'
+| 'return' [Exp] ';' // 1. 有 Exp 2. ⽆ Exp
+| 'printf' '(' StringConst { ',' Exp } ')' ';' // 1. 有 Exp 2. ⽆ Exp
+Case 语句  CaseStmt → 'case' Number ':' { Stmt } | 'default' ':' { Stmt } // 
+1.case 语句  2.default 语句
+表达式  Exp → AddExp // 存在即可
+条件表达式  Cond → LOrExp // 存在即可
+左值表达式  LVal → Ident ['[' Exp ']'] // 1. 普通变量、常量  2. ⼀维数组
+基本表达式  PrimaryExp → '(' Exp ')' | LVal | Number // 1. 嵌套括号表达式  2. 左值
+表达式  3. 数值
+数值  Number → IntConst | CharConst // 存在即可，覆盖整型常量和字符常量
+⼀元表达式  UnaryExp → PrimaryExp | Ident '(' [FuncRParams] ')' | UnaryOp 
+UnaryExp | '(' BType ')' UnaryExp // 1.PrimaryExp 2. 函数调⽤且⽆  FuncRParams 
+3. 函数调⽤且存在  FuncRParams 4.UnaryOp UnaryExp 5. 显式类型转换
+单⽬运算符  UnaryOp → '+' | '−' | '!' 注：'!'仅出现在条件表达式中  // 三种均需覆盖
+函数实参表达式  FuncRParams → Exp { ',' Exp } // 1. 花括号内重复 0 次  2. 花括号内重复多
+次 ( 花括号内重复 >=2 次，即，⾄少出现 3 次 Exp) 3.Exp 需要覆盖数组传参和数组元素传参
+乘除模表达式  MulExp → UnaryExp | MulExp ('*' | '/' | '%') UnaryExp // 
+1.UnaryExp 2.* 3./ 4.% 均需覆盖
+加减表达式  AddExp → MulExp | AddExp ('+' | '−') MulExp // 1.MulExp 2.+ 需覆盖 
+3.- 需覆盖
+关系表达式  RelExp → AddExp | RelExp ('<' | '>' | '<=' | '>=') AddExp // 
+1.AddExp 2.< 3.> 4.<= 5.>= 均需覆盖
+相等性表达式  EqExp → RelExp | EqExp ('==' | '!=') RelExp // 1.RelExp 2.== 
+3.!= 均需覆盖
+逻辑与表达式  LAndExp → EqExp | LAndExp '&&' EqExp // 1.EqExp 2.&& 均需覆盖
+逻辑或表达式  LOrExp → LAndExp | LOrExp '||' LAndExp // 1.LAndExp 2.|| 均需覆盖
+常量表达式  ConstExp → AddExp 注：使⽤的  Ident 必须是常量  // 存在即可
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+4 / 17
+===== page 5 =====
+3. 补充说明
+(1) 标识符  Ident
+SysY 语⾔中标识符  Ident 的规范如下  ( identifier ) ：
+identifier → identifier-nondigit
+| identifier identifier-nondigit
+| identifier digit
+其中，identifier-nondigit 为下划线或⼤⼩写字⺟，digit 为 0 到 9 的数字。
+注：请参考  ISO/IEC 9899 http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf 第  51 ⻚关于标识符的
+定义同名标识符的约定：
+全局变量（常量）和局部变量（常量）的作⽤域可以重叠，重叠部分局部变量（常量）优先；
+同名局部变量的作⽤域不能重叠，即同⼀个  Block 内不能有同名的标识符（常量 / 变量）；
+在不同的作⽤域下， SysY 语⾔中变量（常量）名可以与函数名相同；
+保留关键字不能作为标识符。
+// 合法样例
+int main() {
+int a = 0;
+{
+int a = 1;
+printf("%d",a); // 输出  1
+}
+return 0;
+}
+// ⾮法样例
+int main() {
+int a = 0;
+{
+int a = 1;
+int a = 2; // ⾮法！
+}
+return 0;
+}
+(2) 注释
+SysY 语⾔中注释的规范与  C 语⾔⼀致，如下：
+单⾏注释：以序列  // 开始，直到换⾏符结束，不包括换⾏符。
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+5 / 17
+===== page 6 =====
+多⾏注释：以序列  /* 开始，直到第⼀次出现  */ 时结束，包括结束处  */。
+注：请参考  ISO/IEC 9899 http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf 第  66 ⻚关于注释的定
+义。
+(3) 数值常量
+SysY 语⾔中数值常量可以是整型数  IntConst，其规范如下（对应  integer-const）：
+整型常量  integer-const → decimal-const | 0
+ decimal-const → nonzero-digit | decimal-const digit
+ nonzero-digit 为1⾄9的数字。
+注：请参考  ISO/IEC 9899 http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf 第  54 ⻚关于整型常量
+的定义，在此基础上忽略所有后缀。
+(4) 字符常量
+SysY 语⾔中字符常量可以是  CharConst，其规范如下：
+字符常量  CharConst → '\'' <CharElement> '\''
+<CharElement> → <NormalChar> | <EscapeChar>
+<NormalChar> → 除  '\''、'\\' 外的可⻅ ASCII 字符，即： ASCII 码范围 [0x20, 0x7E] 内的字
+符，但不包含0x27和0x5C
+<EscapeChar> → '\\n' | '\\t' | '\\r' | '\\0' | '\\\\' | '\\\''
+注：字符常量⽤于表⽰单个字符，其值为对应字符的  ASCII 码值。字符常量可以赋给  char 类型变量，但不能
+直接赋给  int 类型变量，除⾮使⽤显式类型转换。
+(5) 字符串常量
+SysY 语⾔中  StringConst 的定义如下：
+<FormatChar> → %d | %c | %s
+<NormalChar> → ⼗进制编码为32,33,40-126的 ASCII 字符，'\' （编码 92 ）出现当且仅当
+为 '\n'
+<Char> → <FormatChar> | <NormalChar>
+<StringConst> → '"'{<Char>}'"'
+字符串中仅可能会出现⼀种转义字符 '\n'，⽤以标注此处换⾏，其他转义情况⽆需考虑。
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+6 / 17
+===== page 7 =====
+注：printf 函数中，%d ⽤于输出  int 类型值，%c ⽤于输出  char 类型值，%s ⽤于输出  string(char[])
+类型值。
+4. 难度分级
+为了更好的帮助同学们完成编译器的设计，课程组将题⽬难度做了区分。难度等级分为三级： A 、 B 、 C ，难度
+依次递减：
+C ：最简单的等级，重点考察编译器的基础设计，不包括任何与数组有关的部分，if 与  while 中的条件
+表达式也只有⼀个表达式（即不出现  && 和  || ）不考察短路求值的规则，不考察  char 类型与  switch
+语句。
+B ：在  C 级的基础上，新增数组，包括数组定义，数组元素的使⽤、数组传参等，新增 char 类型与
+switch 语句。
+A ：在  B 级的基础上，新增复杂条件的运算和判断，要遵守短路求值的规则。
+短路求值样例：
+int global_var = 0;
+int func() {
+global_var = global_var + 1;
+return 1;
+}
+int main() {
+if (0 && func()){
+;
+}
+printf("%d",global_var); // 输出  0
+if (1 || func()) {
+;
+}
+printf("%d",global_var); // 输出  0
+return 0;
+}
+四、语义约束
+符合上述⽂法的程序集合是合法的  SysY 语⾔程序集合的超集。下⾯进⼀步给出  SysY 语⾔的语义约束。
+对于本节明确表述的 “ 未定义 ” 的⾏为，要求编写⽂法解读程序时不得出现，保证所有测试程序不出现。
+运⾏时库
+1. 为了降低开发难度，保证所有测试程序中  get_char、get_int、get_string、put_int、
+put_char、put_str 与  printf 只会作为运⾏时库调⽤出现，不会作为⾃定义的变量 / 函数标识符。
+2. printf 函数默认不换⾏。
+3. 与  C 语⾔中的  printf 类似，输出语句中，格式字符将被替换为对应标识符，普通字符原样输出。
+4. 若选择 LLVM IR 作为⽬标代码，则只需在  LLVM IR 中对  get_int、get_char、get_string、
+put_int、put_char、put_str 进⾏声明，将产⽣的  LLVM IR 与  libsysy.zip 中的  libsysy.ll
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+7 / 17
+===== page 8 =====
+进⾏链接即可运⾏，注意  LLVM IR 中不能直接使⽤  printf，⽽需要将其转换为  put_* 调⽤。若选择
+MIPS 汇编作为⽬标代码，则需要使⽤恰当的系统调⽤实现上述函数的功能。
+static 关键字
+1. static 关键字⽤于修饰静态局部变量，不会在全局变量定义中出现。
+2. ⽤  static 修饰的变量声明，即使在声明时未赋初值，编译器也会把它初始化为 0。
+3. ⽤  static 修饰的变量声明若有初始值，其初始值保证在编译期内可求出。
+4. static 关键字指定的变量只初始化⼀次，并在之后调⽤该函数时保留其状态，离开函数时不会被销
+毁。
+类型约束
+1. 为降低教学复杂度， SysY 语⾔中  int 和  char 是两种不同的基本类型，不允许直接进⾏混合运算，但
+允许进⾏显式的类型转换（详⻅下），转换后类型⼀致则可以混合运算。
+2. 当表达式中出现多类型（包括  int/char/int[]/char[]/void 任意类型）混合运算（且未正确使⽤
+显式类型转换）时，应报类型不匹配错误。
+3. char 类型变量可以单独使⽤，也可以进⾏  char 类型之间的运算，运算结果仍为  char 类型。
+4. int 类型变量可以单独使⽤，也可以进⾏  int 类型之间的运算，运算结果仍为  int 类型。
+5. 在赋值语句中，左值和右值的类型必须⼀致，即  int 变量只能赋  int 值，char 变量只能赋  char 值。
+6. 数组下标、数组⻓度只能使⽤  int 类型的表达式，不能使⽤  char 类型的表达式。
+7. 函数参数传递时，实参类型必须与形参类型完全⼀致。
+8. 函数返回值类型必须与函数声明的返回类型⼀致。
+9. char 类型定义为  unsigned char（⽆符号 8 位整数），取值范围为  0 ~ 255。此定义符合  ISO/IEC 9899 C
+语⾔标准中  unsigned char 的规范。
+10. char 类型运算发⽣溢出时，采⽤  模 256 回绕（ wrap-around ） ⽅式处理。例如：255 + 1 的结果为
+0，0 - 1 的结果为  255。此⾏为符合  C 语⾔标准中  unsigned 整数的溢出处理规则。
+11. char 类型变量的值范围为  0 ~ 255 ，其中  0 ~ 127 对应标准  ASCII 字符，可通过字符常量赋值；128 ~
+255 只能通过运算溢出或直接赋数值产⽣。printf 使⽤  %c 输出时，编译器只需确保正确传递  char 值
+给  printf 函数，输出结果由运⾏环境决定。测试⽤例应避免使⽤  %c 输出  128 ~ 255 的值。
+12. 当字符串常量⽤于初始化  char 或  char[] 时，应将字符串的字节序列（按转义处理后得到的字节）逐
+字节复制到数组中；若数组⻓度⼤于字符串⻓度，则剩余元素置  0 ；若数组⻓度  N ⼩于字符串⻓度，则
+只复制字符串的前  N 个字节，不要额外添加  \0。
+13. 显式类型转换语法  (BType) UnaryExp ⽤于将基本类型表达式进⾏显式转换。被转换的表达式
+UnaryExp 的类型必须是基本类型  int 或  char。转换后表达式的类型为⽬标基本类型  BType。显式类
+型转换可以解决由于类型不匹配导致的混合运算、赋值、传参或返回等错误。
+注：打印时，%d ⽤于输出  int，%c ⽤于输出  char。当向运⾏时库传递  char 时，编译器应确保按⽬标平台
+ABI 正确传递  8 位⽆符号值（通常会经过整型提升或按  ABI 要求扩展到机器整型）。测试⽤例中尽量使⽤  ASCII
+范围（ 0..127 ）的字符常量和字符串，以避免平台编码差异影响结果。
+注：此约束旨在在语义阶段时就建构类型系统，避免在中间代码⽣成时再对前端部分进⾏调整。
+编译单元  CompUnit
+编译单元  CompUnit → {Decl} {FuncDef} MainFuncDef
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+8 / 17
+===== page 9 =====
+声明  Decl → ConstDecl | VarDecl
+1. CompUnit 的顶层变量 / 常量声明语句（对应  Decl ）、函数定义（对应  FuncDef ）都不可以重复定义同
+名标识符（  Ident ），即便标识符的类型不同也不允许。
+2. CompUnit 的变量 / 常量 / 函数声明的作⽤域从该声明处开始到⽂件结尾。
+常量定义  ConstDef
+常量定义  ConstDef → Ident [ '[' ConstExp ']' ] '=' ConstInitVal
+1. ConstDef ⽤于定义符号常量。ConstDef 中的  Ident 为常量的标识符，在  Ident 后、= 之前是可选
+的⼀维数组以及⼀维数组⻓度的定义部分，在  = 之后是初始值。常量必须有对应的初始值。
+2. ConstDef 的⼀维数组以及⼀维数组⻓度的定义部分不存在时，表⽰定义单个变量。
+3. ConstDef 的⼀维数组以及⼀维数组⻓度的定义部分存在时，表⽰定义数组。其语义和  C 语⾔⼀致，每
+维的下界从  0 编号。
+4. ConstDef 中表⽰各维⻓度的  ConstExp 都必须是整型常量表达式。
+变量定义  VarDef
+变量定义  VarDef → Ident [ '[' ConstExp ']' ] | Ident [ '[' ConstExp ']' ] 
+'=' InitVal
+1. 变量的定义与常量基本⼀致，但是变量可以没有初始值部分，此时其运⾏时实际初值未定义。
+初值  ConstInitVal / InitVal
+常量初值  ConstInitVal → ConstExp | '{' [ ConstExp { ',' ConstExp } ] '}' | 
+StringConst
+变量初值  InitVal → Exp | '{' [ Exp { ',' Exp } ] '}' | StringConst
+1. 任何常量的初值表达式必须是常量表达式  ConstExp。
+2. 常量必须有初始值，常量数组不需要每⼀个元素都有初始值，但是未赋值的部分编译器需要将其置 0。
+3. 全局变量的初值表达式也必须是常量表达式  ConstExp。但局部变量的初值表达式是  Exp，可以使⽤已
+经声明的变量。
+4. 对于单个的常量或变量，初始值也必须是单个的表达式。（表达式包括单个数字、单个变量、单个常量等
+情况）
+5. 对于全局变量，如果没有给出初始值，那么应该全部置  0 ，局部变量不需要。
+函数形参  FuncFParam 与实参  FuncRParams
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+9 / 17
+===== page 10 =====
+函数形参表  FuncFParams → FuncFParam { ',' FuncFParam }
+函数实参表  FuncRParams → Exp { ',' Exp }
+1. FuncFParam 定义⼀个函数的⼀个形式参数。当  Ident 后⾯的可选部分存在时，  表⽰数组定义。
+2. 函数实参的语法是  Exp。对于普通变量，遵循按值传递；对于数组类型的参数，则形参接收的是实参数
+组的地址，并通过地址间接访问实参数组中的元素。
+3. 函数调⽤时要保证实参类型和形参类型⼀致，具体请看下⾯例⼦。
+void f1(int x){
+    return ;
+}
+void f2(int x[]){
+    return ;
+}
+int main(){
+    int x = 10;
+    int t[5] = {1, 2, 3, 4, 5};
+    f1(x); // 合法
+    f1(t[0]); // 合法
+    f1(t); // 不合法
+    f2(t); // 合法
+}
+函数定义  FuncDef
+函数定义  FuncDef → FuncType Ident '(' [FuncFParams] ')' Block
+1. FuncDef 表⽰函数定义。其中的  FuncType 指明返回类型。当返回类型为  int 时，函数内所有分⽀都
+应当含有带有  Exp 的  return 语句。不含有  return 语句的分⽀的返回值未定义。当返回值类型为
+void 时，函数内只能出现不带返回值的  return 语句。
+2. FuncFParams 的语义如前⽂。
+语句块  Block
+1. Block 表⽰语句块。语句块会创建作⽤域，语句块内声明的常量和变量的⽣存期在该语句块内。
+2. 语句块内可以再次定义与语句块外同名的变量或常量  ( 通过  Decl 语句 ) ，其作⽤域从定义处开始到该语
+句块尾结束，它隐藏语句块外的同名变量或常量。
+3. 为了降低开发难度，保证所有测试程序中有返回值的函数  Block 的最后⼀句⼀定会显式的给出  return 语
+句，否则就当作 “ ⽆返回语句 ” 的错误处理。 同时，同学们编写上传的样例程序时，也需要保证这⼀点。
+4. main 函数的返回值只能为常数 0 。
+语句  Stmt
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+10 / 17
+===== page 11 =====
+1. Stmt 中的  if 类型语句遵循就近匹配，即，在没有使⽤⼤括号明确界定代码块范围的情况下，⼀个
+else 语句总是与它上⽅距离它最近的、且尚未配对的  if 语句结合（配对）。
+2. 单个  Exp 可以作为  Stmt。这个  Exp 会被求值（这可能产⽣副作⽤），但是所求的值会被丢弃。
+3. while 语句中，Cond 为循环条件，Stmt 为循环体。当  Cond 为真时，执⾏  Stmt，否则跳出循环。
+4. switch 语句中，Exp 为  switch 表达式，其值⽤于与各个  case 的  Number 进⾏匹配。
+5. switch 语句中的每个  case 后必须有  Number 作为匹配值。Number 的类型必须与  switch 表达式
+Exp 的类型⼀致：若  Exp 为  int 类型，Number 必须为  int 常量（IntConst）；若  Exp 为  char 类
+型， Number 必须为  char 常量（CharConst）。
+6. switch 语句中最多可以有⼀个  default 语句，当所有  case 都不匹配时执⾏  default 后的语句。
+7. break 语句可以出现在循环语句（while）或  switch 语句中，⽤于跳出循环或  switch 结构。
+8. continue 语句只能出现在循环语句（while）中，⽤于跳过当前迭代，继续下⼀次循环。
+9. switch 语句中，break ⽤于跳出  switch 结构，若某个  case 后没有  break，则继续执⾏下⼀个
+case 的语句。
+左值  LVal
+1. LVal 表⽰具有左值的表达式，可以为变量或者某个数组元素。
+2. 当  LVal 表⽰数组时，⽅括号个数必须和数组变量的维数相同（即定位到元素）。
+3. 当  LVal 表⽰单个变量时，不能出现后⾯的⽅括号。
+Exp 与  Cond
+1. Exp 在  SysY 中代表算术表达式； Cond 代表条件表达式，故它定义为  LOrExp 。前者的单⽬运算符中
+不出现 '!' ，后者可以出现。
+2. LVal 必须是当前作⽤域内、该  Exp 语句之前有定义的变量或常量；对于赋值号左边的  LVal 必须是变
+量。
+3. 函数调⽤形式是  Ident '('' FuncRParams ')'，其中的  FuncRParams 表⽰实际参数。实际参数
+的类型和个数必须与  Ident 对应的函数定义的形参完全匹配。
+4. SysY 中算符的优先级与结合性与  C 语⾔⼀致，在上⾯的  SysY ⽂法中已体现出优先级与结合性的定义。
+⼀元表达式  UnaryExp
+1. 相邻两个  UnaryOp 不能相同，如  int a = ++-i; ，但是  int a = +-+i; 是可⾏的。
+2. UnaryOp 为  ! 只能出现在条件表达式中。
+3. 显式类型转换  (BType) UnaryExp 中的  BType 只能是基本类型  int 或  char。
+常量表达式  ConstExp
+1. ConstExp 在  SysY 中代表可在编译期求值的表达式，可以是  int 型表达式或  char 型表达式。
+2. ConstExp 在编译期内是可被求值的，且需要符合  C 语⾔标准中 “ 整型常量表达式（ integer constant
+expression ） ” 的约束：其操作数只能为整型常量、字符常量，不能访问其它变量、不能进⾏函数调⽤（即
+使访问的变量、进⾏的函数调⽤理论上是能在编译期求值的）。
+3. ConstExp 中不能出现  int 和  char 类型的混合运算，必须保证类型⼀致性（如果使⽤了显式类型转
+换，则按照转换后的⽬标类型进⾏⼀致性检查）。
+4. ConstExp 主要⽤于以下场景：
+数组定义时指定各维⻓度（此时必须是  int 型常量表达式）
+常量定义时的初始值
+全局变量的初始值
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+11 / 17
+===== page 12 =====
+5. 常量表达式中允许包含显式类型转换  (BType) UnaryExp，且在编译期对其进⾏求值（即⽀持常量折
+叠，例如将字符常量强转为  int，或将整型常量强转为  char，转换后的值在编译期直接计算出来）。
+六、错误处理
+以下内容是为了词法分析及以后的实验作业准备的，在完成⽂法解读作业时请编写符合上⾯⽂法的正确的源程
+序！
+从词法分析作业开始，我们每次作业都要求同学们开发的编译器能够处理正确的程序与错误的程序，对于正确
+的程序按照每次作业要求输出正确结果，对于错误的程序输出所有的错误的⾏号和错误类别码。
+错误主要分为三类，词法分析部分错误，语法分析部分错误，语义分析部分错误。同学们在涉及编译器时，应
+该完成这三个部分的所有错误处理之后再进⾏错误的输出。
+后续实验中，对于错误的源程序完成语义分析后不进⾏中间代码⽣成。
+下⾯列出的错误并不能覆盖所有源程序中可能出现的错误，但只要求编译器能处理下⾯列出的错误，同时保证
+测试⽤例只涉及下⾯列出的错误。
+错误类型列表
+错误类别  a 为词法分析中会出现的错误。
+错误类别  i, j, k 为语法分析中会出现的错误。
+剩余错误类别均为语义分析中会出现的错误。
+错误类型
+错
+误
+类
+别
+码
+解释 对应⽂法及出错符号， … 表⽰省
+略该条规则其他部分
+⾮法符号 a
+出现了  & 和  | 这两个符号，应该将其当做  && 与
+|| 进⾏处理，但是在记录单词名称的时候仍记录
+& 和  |，  报错⾏号为  '&' 或  '|' 所在的⾏号。
+LAndExp → LAndExp '&&'
+EqExp<br />LOrExp →
+LOrExp '||' LAndExp
+名字重定义 b
+函数名或者变量名在当前作⽤域下重复定义。注
+意，变量⼀定是同⼀级作⽤域下才会判定出错，
+不同级作⽤域下，内层会覆盖外层定义。报错⾏
+号  Ident 所在⾏数。
+ConstDef → Ident …<br
+/>VarDef → … Ident …
+Ident …
+FuncDef → FuncType Ident
+…<br />FuncFParam →
+BType Ident ...
+未定义的名
+字 c 使⽤了未定义的标识符报错⾏号为  Ident 所在⾏
+数。
+LVal → Ident …
+UnaryExp → Ident …
+函数参数个
+数不匹配 d
+函数调⽤语句中，参数个数与函数定义中的参数
+个数不匹配。报错⾏号为函数调⽤语句的函数名
+所在⾏数。
+UnaryExp → Ident '(' [
+FuncRParams ] ')'
+类型不匹配 e 当表达式中出现多类型 ( 指
+int/char/int[]/char[]/void 中任意类型 )
+Stmt → LVal '=' Exp ';'
+Stmt → 'return' [Exp]
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+12 / 17
+===== page 13 =====
+错误类型
+错
+误
+类
+别
+码
+解释 对应⽂法及出错符号， … 表⽰省
+略该条规则其他部分
+混合运算时，或者有返回值的函数返回的类型与
+定义的返回类型不⼀致，或者赋值语句中左值和
+右值类型不⼀致，或者函数参数传递时实参类型
+与形参类型不⼀致，或者  switch 语句中  case
+的  Number 类型与  switch 表达式类型不⼀致，
+或者  printf 语句中格式字符串与表达式类型不
+⼀致时 , 或者函数标识符与变量相互误⽤时，报此
+错误。报错⾏号为发⽣类型不匹配的位置所在⾏
+号。
+';'
+UnaryExp → Ident '('
+[FuncRParams] ')'
+CaseStmt → 'case' Number
+':' ...
+Stmt →
+'printf''('StringConst
+{','Exp}')'';'
+⽆返回值的
+函数存在不
+匹配的
+return 语
+句
+f 报错⾏号为  'return' 所在⾏号。 Stmt → 'return' { '['
+Exp ']' } ';'
+有返回值的
+函数缺少
+return 语
+句
+g
+只需要考虑函数末尾是否存在  return 语句，⽆
+需考虑控制流。报错⾏号为函数  结尾的 '}' 所在⾏
+号。
+FuncDef → FuncType Ident
+'(' [FuncFParams] ')'
+Block
+MainFuncDef → 'int'
+'main' '(' ')' Block
+不能改变常
+量的值 h LVal 为常量时，不能对其修改。报错⾏号为  LVal
+所在⾏号。 Stmt → LVal '=' Exp ';'
+缺少分号 i 报错⾏号为分号前⼀个⾮终结符所在⾏号。 Stmt, ConstDecl 及  VarDecl
+中的  ;
+缺少右⼩括
+号 ')' j 报错⾏号为右⼩括号前⼀个⾮终结符所在⾏号。
+函数调⽤  ( UnaryExp ) 、函数定
+义  ( FuncDef, MainFuncDef )
+、  Stmt、PrimaryExp 及  显式
+类型转换  '(' BType ')'
+UnaryExp 中的  ')'
+缺少右中括
+号 ’]’ k 报错⾏号为右中括号前⼀个⾮终结符所在⾏号。
+数组定义  ( ConstDef, VarDef,
+FuncFParam ) 和使⽤  ( LVal )
+中的  ']'
+printf 中
+格式字符与
+表达式个数
+不匹配
+l 报错⾏号为  'printf' 所在⾏号。 'printf' '(' StringConst
+{',' Exp} ')' ';'
+在⾮循环块
+中使⽤
+m 报错⾏号为  'break' 与  'continue' 所在⾏号。
+break 可以出现在  while 循环或  switch 语句
+Stmt → 'break'
+';'|'continue' ';'
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+13 / 17
+===== page 14 =====
+错误类型
+错
+误
+类
+别
+码
+解释 对应⽂法及出错符号， … 表⽰省
+略该条规则其他部分
+break 和
+continue
+语句
+中，continue 只能出现在  while 循环中。
+switch 语
+句中  case
+和
+default
+重复
+n
+switch 语句中出现了重复的  case 常量值，或
+者出现了多个  default 分⽀。报错⾏号为重复
+的  'case' 或  'default' 所在⾏号。
+CaseStmt → 'case' Number
+':' { Stmt } | 'default'
+':' { Stmt }
+错误输出⽰例
+  输出结构
+错误的⾏号  错误的类别码（中间仅⽤⼀个空格间隔）
+  样例输⼊
+const int const1 = 1, const2 = -100;
+int change1;
+int gets1(int var1,int var2){
+   const1 = 999;
+   change1 = var1 + var2          return (change1);
+}
+int main(){
+   change1 = 10;
+   printf("Hello World");
+   return 0;
+}
+  样例输出
+4 h
+5 i
+⽂法符号与错误类型对应
+  为⽅便对照 , 下⽂给出了⽂法符号与  可能存在 的错误的对应关系 :
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+14 / 17
+===== page 15 =====
+编译单元  CompUnit → {Decl} {FuncDef} MainFuncDef
+声明  Decl → ConstDecl | VarDecl
+常量声明  ConstDecl → 'const' BType ConstDef { ',' ConstDef } ';' // i
+基本类型  BType → 'int' | 'char'
+常量定义  ConstDef → Ident [ '[' ConstExp ']' ] '=' ConstInitVal // b, k
+常量初值  ConstInitVal → ConstExp | '{' [ ConstExp { ',' ConstExp } ] '}'
+变量声明  VarDecl → [ 'static' ] BType VarDef { ',' VarDef } ';' // i
+变量定义  VarDef → Ident [ '[' ConstExp ']' ] | Ident [ '[' ConstExp ']' ] 
+'=' InitVal // b, k
+变量初值  InitVal → Exp | '{' [ Exp { ',' Exp } ] '}'
+函数定义  FuncDef → FuncType Ident '(' [FuncFParams] ')' Block // b, e, g, j
+主函数定义  MainFuncDef → 'int' 'main' '(' ')' Block // g, j
+函数类型  FuncType → 'void' | 'int' | 'char'
+函数形参表  FuncFParams → FuncFParam { ',' FuncFParam }
+函数形参  FuncFParam → BType Ident ['[' ']'] // b, k
+语句块  Block → '{' { BlockItem } '}'
+语句块项  BlockItem → Decl | Stmt
+语句  Stmt → LVal '=' Exp ';' // e, h, i
+| [Exp] ';' // i
+| Block
+| 'if' '(' Cond ')' Stmt [ 'else' Stmt ] // j
+| 'while' '(' Cond ')' Stmt // j
+| 'switch' '(' Exp ')' '{' { CaseStmt } '}' // j
+| 'break' ';' | 'continue' ';' // i, m
+| 'return' [Exp] ';' // e, f, i
+| 'printf' '(' StringConst { ',' Exp } ')' ';' // e, l
+Case 语句  CaseStmt → 'case' Number ':' { Stmt } | 'default' ':' { Stmt } // 
+e, n
+表达式  Exp → AddExp
+条件表达式  Cond → LOrExp
+左值表达式  LVal → Ident ['[' Exp ']'] // c, k
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+15 / 17
+===== page 16 =====
+基本表达式  PrimaryExp → '(' Exp ')' | LVal | Number // j
+数值  Number → IntConst | CharConst
+⼀元表达式  UnaryExp → PrimaryExp | Ident '(' [FuncRParams] ')' | UnaryOp 
+UnaryExp | '(' BType ')' UnaryExp // c, d, e, j
+单⽬运算符  UnaryOp → '+' | '−' | '!' 注：'!'仅出现在条件表达式中
+函数实参表  FuncRParams → Exp { ',' Exp }
+乘除模表达式  MulExp → UnaryExp | MulExp ('*' | '/' | '%') UnaryExp
+加减表达式  AddExp → MulExp | AddExp ('+' | '−') MulExp
+关系表达式  RelExp → AddExp | RelExp ('<' | '>' | '<=' | '>=') AddExp
+相等性表达式  EqExp → RelExp | EqExp ('==' | '!=') RelExp
+逻辑与表达式  LAndExp → EqExp | LAndExp '&&' EqExp // a
+逻辑或表达式  LOrExp → LAndExp | LOrExp '||' LAndExp // a
+常量表达式  ConstExp → AddExp 注：使⽤的  Ident 必须是常量
+特别说明
+1. 错误  i ， j ， k 类型中的 “ 前⼀个⾮终结符 ” 强调的是在⽂法规则⾥出现在  ; ) ] 之前的⾮终结符号，在分析
+中处理的是该⾮终结符产⽣的终结符号串的最后⼀个符号，也就是  ; ) ] 本应该正常出现的位置的上⼀
+个单词。
+2. 所有错误都不会出现恶意换⾏的情况，包括字符、字符串中的换⾏符、函数调⽤等等。所谓恶意换⾏是
+指会使得错误处理难以正确进⾏的换⾏。
+3. 其他类型的错误，错误的⾏号以能够断定发现出错的第⼀个符号的⾏号为准。例如有返回值的函数缺少
+返回语句的错误，只有当识别到函数末尾的  } 时仍未出现返回语句，才可以断定出错，报错⾏号即为  }
+的⾏号。
+4. 为了避免因为测试程序中的错误导致出现语法⼆义性，使得语法树以错误的⽅式建⽴，我们保证，所有
+会导致语法树不能正确建⽴的错误都不会出现。
+5. 每⼀⾏中最多只有⼀个错误。
+6. 同⼀作⽤域下函数和变量之间不能有相同的名字。
+7. 对于⼀个名字重定义的函数，也应该完整分析函数内部是否具有其它错误。
+8. 对于调⽤函数时，参数类型不匹配⼀共有以下⼏种情况的不匹配：
+传递数组给变量。
+传递变量给数组。
+传递  int 类型给  char 类型参数。
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+16 / 17
+===== page 17 =====
+传递  char 类型给  int 类型参数。
+9. 对于  e 类型错误，包含所有类型不匹配的错误，本⽂法共 5 种类型，分别是  int、char、int[]、
+char[]、void。对于不符合下述类型匹配规则的错误，均应当返回  e 类型错误：
+不同类型不能进⾏任何混合运算，包括赋值、算数运算、关系运算。
+函数调⽤时，实参类型必须与形参类型完全匹配。
+函数返回值类型必须与函数定义时声明的返回值类型完全匹配。
+switch 语句中，case 标签的常量表达式类型必须与  switch 表达式的类型完全匹配，且必须是
+int 或  char。
+数组下标必须是  int 类型。
+不能将⾮数组类型变量进⾏数组访问。
+10. 对于显式类型转换  (BType) UnaryExp，测试⽤例保证其操作数  UnaryExp 必须是基本类型（int 或
+char），且⽬标类型  BType 也是基本类型（int 或  char），不测试对数组或  void 等⾮基本类型的显式
+转换。如果显式类型转换缺少右⼩括号  )，则应报告  j 类型错误，其报错⾏号为前⼀个⾮终结符  BType
+（即关键字  int 或  char）所在的⾏号。
+11. 测试程序保证不出现未提到的错误形式
+2026 编译技术实验⽂法定义及相关说明 .md 2026-09-08
+17 / 17

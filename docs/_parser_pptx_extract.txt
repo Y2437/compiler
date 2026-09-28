@@ -1,0 +1,30 @@
+==== ppt/slides/slide1.xml ====
+语法分析 | 编译技术实验 | 专题报告
+==== ppt/slides/slide2.xml ====
+啥是语法分析 | 错误处理
+==== ppt/slides/slide3.xml ====
+啥是语法分析 | 单词 | 行号 | 其他信息 | int | 1 | main | 1 | ( | 1 | ) | 1 | { | 2 | … | … | 词法单元流 | 语法分析器 | 抽象语法树
+==== ppt/slides/slide4.xml ====
+啥是抽象语法树 | Abstract Syntax Tree | 作用：线性数据流 | → | 能表示结构层次的树形结构，方便进行中间代码生成。 | int | main | (){ | int | a= | 1 | ; | int | b= | 3 | +a* | 2 | ; | return | 0 | ; | }
+==== ppt/slides/slide5.xml ====
+啥是抽象语法树 | Abstract Syntax Tree | int | a= | 1 | ; | VarDecl | → | BType | VarDef | ';' | VarDef | → Ident '=' | InitVal | InitVal | → Exp | Exp        → | AddExp | AddExp | → | MulExp | MulExp | → | UnaryExp | UnaryExp | → | PrimaryExp | PrimaryExp | → Number | Number     → | IntConst | 叶结点即为终结符，即词法分析的结果 | 树节点 | 表示一个语法成分 | 父节点→子节点：推导 | 子节点→父节点：规约
+==== ppt/slides/slide6.xml ====
+语法分析做法 | 递归下降子程序 | VarDecl | → | BType | VarDef | ';' | VarDef | → Ident '=' | InitVal | 一个程序只关心他的语法成分 | 子程序的语法成分放到子程序中解析
+==== ppt/slides/slide7.xml ====
+语法分析做法 | VarDecl | → | BType | VarDef | ';' | VarDef | → Ident '=' | InitVal | VarDecl | (){ | if | ( | isBType | (now)){ | next | (); | VarDef | (); | if | (now == | ';' | ){ | /* | 执行完成* | / | } | else | { | /* | 错误* | / | } | } | else | { | /* | 错误* | / | } | } | VarDef | (){ | if | ( | isIdent | (now)){ | next | (); | if | (now == | '=' | ){ | next | (); | InitVaL | (); | /* | 执行完成* | / | } | else | { | /* | 错误* | / | } | } | else | { | /* | 错误* | / | } | } | 伪代码
+==== ppt/slides/slide8.xml ====
+语法分析做法 | VarDecl | → | BType | VarDef | ';' | VarDef | → Ident '=' | InitVal | VarDecl | (){ | if | ( | isBType | (now)){ | next | (); | VarDef | (); | if | (now == | ';' | ){ | /* | 执行完成* | / | } | else | { | /* | 错误* | / | } | } | else | { | /* | 错误* | / | } | } | VarDef | (){ | if | ( | isIdent | (now)){ | next | (); | if | (now == | '=' | ){ | next | (); | InitVaL | (); | /* | 执行完成* | / | } | else | { | /* | 错误* | / | } | } | else | { | /* | 错误* | / | } | } | 伪代码
+==== ppt/slides/slide9.xml ====
+多产生式 | Decl | → | ConstDecl | | | VarDecl | ConstDecl | → 'const' | BType | ConstDef | { ',' | ConstDef | } ';’ | VarDecl | → | BType | VarDef | { ',' | VarDef | } ';’ | FIRST | （ | ConstDecl | ） | ={const} | FIRST | （ | VarDecl | ） | ={int, char} | FIRST | （ | Decl | ） | = FIRST | （ | ConstDecl | ）∪ | FIRST | （ | VarDecl | ） | = | {int, char, const | }
+==== ppt/slides/slide10.xml ====
+递归下降 | 难点 | Plan A | ： | AddExp | → | MulExp | ('+' | '−') | AddExp | | | MulExp | 不影响分析 | 影响语法树的结构，语法树的结构影响输出结果 | 左递归文法 | Plan B | ： | AddExp | → | MulExp | | | AddExp | ('+' | '−') | MulExp | AddExp | → | AddExp | ('+' | '−') | MulExp | | | MulExp | Plan C | ： | ……
+==== ppt/slides/slide11.xml ====
+回溯 | → | 预读 | 递归下降 | 难点 | 回溯问题 | CompUnit | → { | Decl | } { | FuncDef | } | MainFuncDef | int | int a=1; | Decl | i | nt | func | (){…} | FuncDef | int main(){…} | MainFuncDef | int compiler114514=1; | Decl | int compiler114514(){…} | FuncDef | c | ompiler114514 | CompUnit | (){ | while | (now == | 'int' | ){ | if | ( | pre | R | ead | == | 'main' | ){ | MainFuncDef | (); | //now == int | } | if | ( | isIdent | ( | pre | R | ead | )){ | //now == int | if | ( | prePreRead | == | '=' | ){ | Decl | (); | //now == int | } | else if | ( | prePreRead | == | '(' | ){ | FuncD | ef | (); | //now == int | } | else | { | /* | 错误* | / | } | } | else | { | /* | 错误* | / | } | } | }
+==== ppt/slides/slide12.xml ====
+递归下降 | 难点 | 回溯问题 | Stmt | → | LVal | '=' Exp ';’ | | [ | Exp | ] ';’ | | Block | | 'if' '(' Cond ')' | Stmt | [ 'else' | Stmt | ] | | 'for' '(' [ | ForStmt | ] ';' [Cond] ';' [ | ForStmt | ] ')' | Stmt | | 'break' ';’ | | 'continue' ';’ | | 'return' [Exp] ';’ | | | LVal | '=' ' | getint | ''('')'';’ | | ' | printf | ''(' | FormatString | {','Exp}')‘';’
+==== ppt/slides/slide13.xml ====
+建树 | 递归下降子程序的可以把终结符分入不同语法成分的结点之下。 | 建树即将已有的终结符与其对应的父节点建立树，一层层往上建立即可。 | 具体的方式可以采用对树的节点进行数据结构的设计，方便进行语法树的生成以及之后的语义分析即可。
+==== ppt/slides/slide14.xml ====
+输出 | INTTK int | IDENFR a | ASSIGN = | INTCON 1 | &lt;Number&gt; | &lt;PrimaryExp&gt; | &lt;UnaryExp&gt; | &lt;MulExp&gt; | &lt;AddExp&gt; | &lt;Exp&gt; | &lt;InitVal&gt; | &lt;VarDef&gt; | SEMICN ; | &lt;VarDecl&gt; | 树的后序遍历
+==== ppt/slides/slide15.xml ====
+谢谢大家
