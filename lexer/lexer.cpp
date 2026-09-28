@@ -6,6 +6,8 @@ using namespace std;
 #define TEST_INT(A)  printf("------>%d\n",A)
 #define PS putchar(32)
 #define NL putchar(10)
+
+#define ONLINE_JUDGE 0
 // ================== 种别码表(编码 / 类别码 / 单词名称) ==================
 //
 //   0    Eof              文件结束(EOF)
@@ -376,7 +378,7 @@ class Lexer{
             {
                 move_forward();
                 c1=get_cur();
-                c2=get_cur();
+                c2=get_next();
             }  
             move_forward(); //得等它结束啊
             move_forward();
@@ -387,9 +389,13 @@ class Lexer{
 };
 
 int main() {
-    freopen("testfile.txt", "r",stdin);
-    FILE* erp = fopen("error.txt", "w");
-    FILE* lep = fopen("lexer.txt", "w");
+    FILE* erp = stderr;
+    FILE* lep = stdout;
+    if(ONLINE_JUDGE){
+        freopen("testfile.txt", "r",stdin);
+        FILE* erp = fopen("error.txt", "w");
+        FILE* lep = fopen("lexer.txt", "w");
+    }
     ErrorControler ec=ErrorControler();
     Lexer lexer=Lexer(&ec);
     lexer.read_source();

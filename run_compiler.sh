@@ -19,8 +19,8 @@ fi
 mkdir -p "$OUT_DIR"
 
 shopt -s nullglob
-for src in "$SRC_DIR"/testfile*.c; do
-    name="$(basename "$src" .c)"
+for src in "$SRC_DIR"/testfile*.txt; do
+    name="$(basename "$src" .txt)"
     echo "===== 分析 $name ====="
     "$EXE" < "$src" > "$OUT_DIR/${name}_lexer.txt" 2> "$OUT_DIR/${name}_error.txt" || true
 done
