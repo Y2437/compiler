@@ -1,5 +1,5 @@
 #include "manager/manager.h"
-#define ONLINE_JUDGE 0
+#define ONLINE_JUDGE 1
 
 using namespace std;
 
@@ -15,6 +15,6 @@ int main() {      //优雅,永不过时
     CompilerManager manager=CompilerManager(in,out,err);
     manager.scan_source();
     manager.scan_lexer();
-    manager.debug_report();
+    manager.debug_report_lexer();
     return 0;
 }

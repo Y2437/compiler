@@ -1,8 +1,9 @@
-#ifndef COMPILER_ERROR_H
-#define COMPILER_ERROR_H
-
+#ifndef COMPILER_ERRORCONTROLLER_H
+#define COMPILER_ERRORCONTROLLER_H
 #include <vector> 
 #include <cstdio>
+#include "../config/enums.h"
+#include "../config/structs.h"
 using namespace std;
 // X(LEX_INVALID_TOKEN,   'a', "invalid token")
 // X(SEM_IDENT_REDEF,     'b', "ident redefined")
@@ -18,21 +19,14 @@ using namespace std;
 // X(SEM_PRINTF_MISMATCH, 'l', "printf format mismatch")
 // X(SEM_BREAK_CONTINUE,  'm', "break or continue outside loop or switch")
 // X(SYN_CASE_DUP,        'n', "duplicated case or default in switch")
-#define X(name,ch,explain) name=(int) ch,
-enum errorKind{
-    #include "../config/errors.def"
-};
-#undef X
 
-struct Error {
-    errorKind type;
-    int lineNum;
-};
+
 
 class ErrorController {
 public:
     void register_error(errorKind type, int lineNum);
     void report_error(FILE * err);
+    void register_ijk(LexTokenKind tar,int lineNum);
     bool has_error();
 private:
     vector <struct Error> errorList;

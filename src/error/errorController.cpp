@@ -12,3 +12,21 @@ void ErrorController::report_error(FILE * err){
 bool ErrorController::has_error(){
     return !errorList.empty();
 }
+void ErrorController::register_ijk(LexTokenKind tar,int lineNum){
+    LexTokenKind kind = tar;
+    switch (kind)
+    {
+    case SEMICN:
+        register_error(SYN_MISS_SEMICN,lineNum);
+        break;
+    case RPARENT:
+        register_error(SYN_MISS_PARENT,lineNum);
+        break;
+    case RBRACK:
+        register_error(SYN_MISS_BRACK,lineNum);
+        break;
+    default:
+        break;
+    }
+
+}

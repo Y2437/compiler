@@ -2,6 +2,8 @@
 #define COMPILER_LEXER_H
 
 #include "../error/errorController.h"
+#include "../config/enums.h"
+#include "../config/structs.h"
 #include <cstdio>
 #include <map>
 #include <string>
@@ -40,24 +42,16 @@ using namespace std;
 //   45   Error            错误(无法识别的字符)
 //
 // ======================================================================
-#define X(name, num) name = num,
-enum TokenKind {
-#include "../config/token.def"
-TK_COUNT
-};
-#undef X
-
-
-struct Token {
-    TokenKind tokenType;
-    string raw_string;
-};
 
 
 
-extern map<string, TokenKind> KEYWORDS;
 
-const char *tokenKindName(TokenKind kind);
+
+
+
+extern map<string, LexTokenKind> KEYWORDS;
+
+const char *LexTokenKindName(LexTokenKind kind);
 
 class Lexer {
 public:
@@ -67,8 +61,8 @@ public:
     // tokenType：解析单词类型
     // lineNum：当前行号
     // number：解析数值
-    vector<Token> & tokenList;
-    Lexer(ErrorController *errorControler,vector<Token> & tokenList);
+
+    Lexer(ErrorController *errorControler,vector<LexToken> & tokenList);
     void read_source(FILE * in);
     void scan();
     void report_token_list(FILE *lep);
@@ -76,13 +70,14 @@ public:
 private:
     size_t curPos;
     int lineNum;
+    int startLineNum;
     int number;
     bool isDoubleOperator;
     string token;
-    TokenKind tokenType;
+    LexTokenKind tokenType;
     string source;
     ErrorController *errorControler;
-
+    vector<LexToken> & tokenList;
     int get_cur();
     int get_next();
     void read_one_char();
@@ -90,13 +85,13 @@ private:
     void move_backward();
     void move_until_nbc();
     void reset_token();
-    TokenKind get_operator_id();
-    Token get_operator_token();
-    Token get_quoted_token(char quote, TokenKind kind);
-    Token get_const_str_token();
-    Token get_const_char_token();
-    Token get_const_int_token();
-    Token get_ident_or_revserve_token();
+    LexTokenKind get_operator_id();
+    LexToken get_operator_token();
+    LexToken get_quoted_token(char quote, LexTokenKind kind);
+    LexToken get_const_str_token();
+    LexToken get_const_char_token();
+    LexToken get_const_int_token();
+    LexToken get_ident_or_revserve_token();
     void skip_line();
     void skip_block();
 };

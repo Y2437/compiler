@@ -3,7 +3,7 @@ set -e
 
 shopt -s nullglob
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 TEST_DIR="$SCRIPT_DIR/sysy_test"
 UPLOAD_DIR="$TEST_DIR/upload"
 

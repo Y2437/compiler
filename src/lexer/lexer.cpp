@@ -37,22 +37,24 @@ using namespace std;
 
 
 // 保留字表
-map <string, TokenKind> KEYWORDS = {
+map <string, LexTokenKind> KEYWORDS = {
     {"while", WHILETK}, {"case", CASETK}, {"char", CHARTK}, {"else", ELSETK},
     {"continue", CONTINUETK}, {"main", MAINTK}, {"default", DEFAULTTK}, {"void", VOIDTK},
     {"printf", PRINTFTK}, {"int", INTTK}, {"return", RETURNTK}, {"if", IFTK},
     {"static", STATICTK}, {"break", BREAKTK}, {"switch", SWITCHTK}, {"const", CONSTTK}
 };
 
+
+
 // 枚举量名称表
 
-const char *tokenKindName(TokenKind kind) {
+const char *LexTokenKindName(LexTokenKind kind) {
     #define X(name,num) [num]=#name,
     static const char * tokenName[]={
-        #include "../config/token.def"  
+        #include "../config/lexer_token.def"  
     };
     #undef X
-    if(kind<0||kind>=TK_COUNT) return "Error";
+    if(kind<0||kind>=LTK_COUNT) return "Error";
     return tokenName[kind];
 }
 
@@ -60,15 +62,14 @@ const char *tokenKindName(TokenKind kind) {
 
 
 
-
-Lexer::Lexer(ErrorController * errorControler,vector<Token> & tokenList) : 
-    curPos(0) ,                            
+ Lexer::Lexer(ErrorController * errorControler, vector<LexToken> & tokenList) :
+    tokenList(tokenList),
+    curPos(0),
     lineNum(1),
     number(0),
-    tokenType(Eof),
     isDoubleOperator(false),
-    errorControler(errorControler),
-    tokenList(tokenList)
+    tokenType(Eof),
+    errorControler(errorControler)
 {
     source.clear();
     token.clear();
@@ -90,6 +91,7 @@ void Lexer::scan(){
         int ch=get_cur();
         int nt=get_next();
         reset_token();
+        startLineNum=lineNum;
         if(ch=='\"'){//STRCON
             tokenList.push_back(get_const_str_token());
         }else if(ch=='\''){//CHARCON
@@ -111,7 +113,7 @@ void Lexer::scan(){
 void Lexer::report_token_list(FILE * lep){
     for (auto & it : tokenList)
     {
-        fprintf(lep,"%s %s\n",tokenKindName(it.tokenType),it.raw_string.c_str());
+        fprintf(lep,"%s %s\n",LexTokenKindName(it.tokenType),it.raw_string.c_str());
     }
 }
 
@@ -162,7 +164,7 @@ void Lexer::move_until_nbc(){       //调用完这个之后的get_cur必定返�
 void Lexer::reset_token(){
     token.clear();
 }
-TokenKind Lexer::get_operator_id(){
+LexTokenKind Lexer::get_operator_id(){
     ui c1=get_cur();
     ui c2=get_next();
     ui key = (c1<<8 | c2);
@@ -199,20 +201,21 @@ TokenKind Lexer::get_operator_id(){
         case '&':
         case '|':
             errorControler->register_error(LEX_INVALID_TOKEN,lineNum);
-        default: return Error;
+            return LexError;   //哎,可惜不优雅,但是不改会warn
+        default: return LexError;
     }
 }
-Token Lexer::get_operator_token(){
-    TokenKind kind=get_operator_id();
+LexToken Lexer::get_operator_token(){
+    LexTokenKind kind=get_operator_id();
     if(isDoubleOperator){
         token.push_back(get_cur());
         move_forward();
     }
     token.push_back(get_cur());
     move_forward();
-    return Token{kind,token};
+    return LexToken{kind,token,startLineNum};
 }
-Token Lexer::get_quoted_token(char quote,TokenKind kind){
+LexToken Lexer::get_quoted_token(char quote,LexTokenKind kind){
     token.push_back(get_cur());
     move_forward();
     while (get_cur()!=quote&&get_cur()!=EOF)
@@ -221,27 +224,27 @@ Token Lexer::get_quoted_token(char quote,TokenKind kind){
     }
     token.push_back(get_cur());
     move_forward();
-    return Token{kind,token};
+    return LexToken{kind,token,startLineNum};
 }
-Token Lexer::get_const_str_token(){
+LexToken Lexer::get_const_str_token(){
     return get_quoted_token('\"',STRCON);
 }
 
-Token Lexer::get_const_char_token(){
+LexToken Lexer::get_const_char_token(){
     return get_quoted_token('\'',CHARCON);
 }
 
-Token Lexer::get_const_int_token(){
+LexToken Lexer::get_const_int_token(){
     int ch=get_cur();
     while(isdigit(ch)){
         token.push_back(ch);
         move_forward();
         ch=get_cur();
     }
-    return Token{INTCON,token};
+    return LexToken{INTCON,token,startLineNum};
 }
 
-Token Lexer::get_ident_or_revserve_token(){
+LexToken Lexer::get_ident_or_revserve_token(){
     int ch=get_cur();
     while (isdigit(ch)||isalpha(ch)||ch=='_')
     {
@@ -250,9 +253,9 @@ Token Lexer::get_ident_or_revserve_token(){
         ch=get_cur();
     }
     if(auto it = KEYWORDS.find(token); it != KEYWORDS.end()){
-        return Token{it->second,it->first};  //枚举值,内容
+        return LexToken{it->second,it->first,startLineNum};  //枚举值,内容
     }
-    return Token{IDENFR,token};
+    return LexToken{IDENFR,token,startLineNum};
 }
 void Lexer::skip_line(){
     int ch=get_cur();

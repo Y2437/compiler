@@ -1,11 +1,14 @@
 #include "manager.h"
 
-CompilerManager::CompilerManager(FILE * in,FILE * out ,FILE * err):
-    in(in),
-    out(out),
-    err(err),
-    errorController(ErrorController()),
-    lexer(Lexer(&errorController,tokenList)){}
+CompilerManager::CompilerManager(FILE * in, FILE * out, FILE * err):
+         errorController(),
+         lexer(&errorController, lexTokenList),
+         parser(lexTokenList,&errorController),
+         in(in),
+         out(out),
+         err(err),
+         parTreeRoot(nullptr)
+{}
 void CompilerManager::report_error(){
     errorController.report_error(err);
 }
@@ -18,10 +21,16 @@ void CompilerManager::scan_source(){
 void CompilerManager::scan_lexer(){
     lexer.scan();
 }
-void CompilerManager::debug_report(){
+void CompilerManager::debug_report_lexer(){
     if(errorController.has_error()){
         report_error();
     }
     report_token_list();
+}
+void CompilerManager::debug_report_parser(){
+    
+}
+void CompilerManager::scan_parser(){
+    parTreeRoot=parser.scan_parser();
 }
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_DIR="$SCRIPT_DIR/build"
 SRC_DIR="$SCRIPT_DIR/sysy_test/src"
 OUT_DIR="$SCRIPT_DIR/output"
