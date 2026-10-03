@@ -199,9 +199,11 @@ LexTokenKind Lexer::get_operator_id(){
         case ',': return COMMA;
         case ';': return SEMICN;
         case '&':
+            errorControler->register_error(LEX_INVALID_TOKEN,lineNum);
+            return AND;
         case '|':
             errorControler->register_error(LEX_INVALID_TOKEN,lineNum);
-            return LexError;   //哎,可惜不优雅,但是不改会warn
+            return OR;   //返回原样
         default: return LexError;
     }
 }

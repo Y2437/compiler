@@ -1,31 +1,8 @@
-int main() {
-    int x = 2;
-    switch (x) {
-    case 1:
-        printf("one\n");
-        break;
-    case 2:
-        printf("two\n");
-        break;
-    case 3:
-        printf("three\n");
-        break;
-    default:
-        printf("other\n");
-        break;
-    }
-
-    x = 5;
-    switch (x) {
-    case 1:
-        printf("one\n");
-        break;
-    case 2:
-        printf("two\n");
-        break;
-    default:
-        printf("other\n");
-        break;
+int main(){
+    int c;
+    c = get_int()
+    if(1 & 2){
+        printf("output is %d\n", c);
     }
     return 0;
 }

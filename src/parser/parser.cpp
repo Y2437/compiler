@@ -95,7 +95,9 @@ void Parser::match(ParToken * father, LexTokenKind tar){
         node->lexToken=&get_cur();
         father->add(node);      
         move_forward();
-    }else{
+    }else if(get_cur().tokenType==LexError){
+        move_forward();
+    }else {
         errorController->register_ijk(tar,get_prev_line());
     }
 }
@@ -372,7 +374,7 @@ ParToken * Parser::parse_BlockItem(){
 // | 'printf' '(' StringConst { ',' Exp } ')' ';' // e, l
 ParToken * Parser::parse_Stmt(){
     ParToken * node = make_ParToken(Stmt);
-    if(check(IDENFR)){
+    if(is_Assign_ahead()){
 
         node->add(parse_LVal());
         match(node,ASSIGN);
@@ -383,7 +385,8 @@ ParToken * Parser::parse_Stmt(){
 
         match(node,SEMICN);
 
-    }else if(is_any_Exp_ahead()){
+    }else if(is_any_Exp_ahead()){    //哎呦我去,为什么会有人写一个Exp在这?
+                                    //哦哦哦,可以是FuncCall
 
         node->add(parse_Exp());
         match(node,SEMICN);
@@ -465,6 +468,15 @@ ParToken * Parser::parse_Stmt(){
 }
 //啊啊啊啊啊啊啊啊终于写完了
 
+bool Parser::is_Assign_ahead(){  //针对Stmt的第一分支
+    int offset=0;
+    while(!check(SEMICN,offset)&&!check(Eof,offset)){
+        if(check(ASSIGN,offset)) return true&&check(IDENFR);  //防止错判if和while,我chovy
+        offset++;
+    }
+    return false;
+}
+
 
 bool Parser::is_Stmt_ahead(){  //应该是没有重合
     return is_any_Exp_ahead()||check_any({IDENFR,SEMICN,LBRACE,IFTK,WHILETK,SWITCHTK,BREAKTK,CONTINUETK,RETURNTK,PRINTFTK});
@@ -487,7 +499,6 @@ ParToken * Parser::parse_CaseStmt(){
     match(node,COLON);
     while (is_Stmt_ahead())
     {
-        printf("--------------------->\n");
         node->add(parse_Stmt());
     }
     return node;
@@ -552,6 +563,7 @@ ParToken * Parser::parse_UnaryExp(){
         node->add(parse_UnaryExp());
     }else if(is_PLUS_MINU_NOT_ahead()){
         node->add(parse_UnaryOp());
+        node->add(parse_UnaryExp());
     }else if(is_FuncCall_ahead()){
         match(node,IDENFR);
         match(node,LPARENT);
@@ -604,6 +616,9 @@ ParToken * Parser::parse_MulExp(){
     node->add(parse_UnaryExp());
     while (is_MULT_DIV_MOD_ahead())
     {
+        ParToken * parent = make_ParToken(MulExp);
+        parent->add(node);
+        node = parent;
         if(check(MULT)){
             match(node,MULT);
         }else if(check(DIV)){
@@ -626,6 +641,9 @@ ParToken * Parser::parse_AddExp(){
     node->add(parse_MulExp());
     while (is_PLUS_MINU_ahead())
     {
+        ParToken * parent = make_ParToken(AddExp);
+        parent->add(node);
+        node = parent;
         if(check(PLUS)){
             match(node,PLUS);
         }else if(check(MINU)){
@@ -647,6 +665,9 @@ ParToken * Parser::parse_RelExp(){
     node->add(parse_AddExp());
     while (is_LSS_GRE_LEQ_GEQ_ahead())
     {
+        ParToken * parent = make_ParToken(RelExp);
+        parent->add(node);
+        node = parent;
         if(check(LSS)){
             match(node,LSS);
         }else if(check(GRE)){
@@ -671,6 +692,9 @@ ParToken * Parser::parse_EqExp(){
     node->add(parse_RelExp());
     while (is_EQL_NEQ_ahead())
     {
+        ParToken * parent = make_ParToken(EqExp);
+        parent->add(node);
+        node = parent;
         if(check(EQL)){
             match(node,EQL);
         }else if(check(NEQ)){
@@ -689,6 +713,9 @@ ParToken * Parser::parse_LAndExp(){
     node->add(parse_EqExp());
     while (check(AND))
     {
+        ParToken * parent = make_ParToken(LAndExp);
+        parent->add(node);
+        node = parent;
         match(node,AND);
         node->add(parse_EqExp());
     }
@@ -700,6 +727,9 @@ ParToken * Parser::parse_LOrExp(){
     node->add(parse_LAndExp());
     while (check(OR))
     {
+        ParToken * parent = make_ParToken(LOrExp);
+        parent->add(node);
+        node = parent;
         match(node,OR);
         node->add(parse_LAndExp());
     }

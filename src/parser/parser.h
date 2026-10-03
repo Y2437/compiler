@@ -62,6 +62,7 @@ class Parser{
         bool is_EQL_NEQ_ahead();
         bool is_PLUS_MINU_NOT_ahead();
         bool is_Block_ahead();
+        bool is_Assign_ahead();
 
 
         ParToken * parse_CompUnit();

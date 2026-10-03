@@ -4,6 +4,7 @@
 #include <cstdio>
 #include "../config/enums.h"
 #include "../config/structs.h"
+#include <algorithm>
 using namespace std;
 // X(LEX_INVALID_TOKEN,   'a', "invalid token")
 // X(SEM_IDENT_REDEF,     'b', "ident redefined")

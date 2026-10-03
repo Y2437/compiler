@@ -6,8 +6,12 @@ using namespace std;
 #include <vector>
 #include <cstdio>
 struct Error {
-    errorKind type;
     int lineNum;
+    errorKind type;
+
+    bool operator<(const Error & other) const {
+        return lineNum < other.lineNum;
+    }
 };
 
 struct LexToken {

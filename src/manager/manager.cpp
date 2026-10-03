@@ -28,6 +28,9 @@ void CompilerManager::debug_report_lexer(){
     report_token_list();
 }
 void CompilerManager::debug_report_parser(){
+    if(errorController.has_error()){
+        report_error();
+    }
     report_parser_tool(parTreeRoot);
 }
 
@@ -49,9 +52,7 @@ void CompilerManager::report_parser_tool(ParToken * node){
 
 }
 void CompilerManager::scan_parser(){
-    if(errorController.has_error()){
-        report_error();
-    }
+
     parTreeRoot=parser.scan_parser();
 }
 

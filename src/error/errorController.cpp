@@ -1,11 +1,14 @@
 #include "errorController.h"
 
 
+
 void ErrorController::register_error(errorKind type,int lineNum ){
-    errorList.push_back({type,lineNum});
+    errorList.push_back({lineNum,type});
 }
 void ErrorController::report_error(FILE * err){
+    sort(errorList.begin(),errorList.end()); 
     for(auto &  e : errorList){
+        
         fprintf(err,"%d %c\n",e.lineNum,(char)e.type);
     }
 }
