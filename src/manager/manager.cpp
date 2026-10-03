@@ -28,7 +28,18 @@ void CompilerManager::debug_report_lexer(){
     report_token_list();
 }
 void CompilerManager::debug_report_parser(){
-    
+    report_parser_tool(parTreeRoot);
+}
+void CompilerManager::report_parser_tool(ParToken * node){
+    printf("%s %s\n",LexTokenKindName(node->lexToken->tokenType),node->lexToken->raw_string.c_str());
+    if(node->type!=Leaf) {
+        for (auto & child : node->childs)
+        {
+            report_parser_tool(child);   
+        }
+        printf("%s\n",ParTokenKindName(node->type));
+    }
+
 }
 void CompilerManager::scan_parser(){
     parTreeRoot=parser.scan_parser();

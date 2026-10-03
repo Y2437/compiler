@@ -15,6 +15,6 @@ int main() {      //优雅,永不过时
     CompilerManager manager=CompilerManager(in,out,err);
     manager.scan_source();
     manager.scan_lexer();
-    manager.debug_report_lexer();
+    manager.debug_report_parser();
     return 0;
 }

@@ -17,6 +17,7 @@ class CompilerManager{
         FILE * out;
         FILE * err;
         ParToken * parTreeRoot;
+        void report_parser_tool(ParToken * node);
     public:
         CompilerManager(FILE * in,FILE * out ,FILE * err);
         void report_error();
