@@ -16,6 +16,7 @@ class Parser{
     public:
         Parser(const vector<LexToken> & lexTokenList,ErrorController * errorController);
         ParToken * scan_parser();
+
     private:
         const vector<LexToken> & lexTokenList;
         ErrorController * errorController;
@@ -60,6 +61,7 @@ class Parser{
         bool is_LSS_GRE_LEQ_GEQ_ahead();
         bool is_EQL_NEQ_ahead();
         bool is_PLUS_MINU_NOT_ahead();
+        bool is_Block_ahead();
 
 
         ParToken * parse_CompUnit();

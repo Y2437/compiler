@@ -3,10 +3,10 @@
 // 常量声明 ConstDecl → 'const' BType ConstDef { ',' ConstDef } ';' // i
 // 基本类型 BType → 'int' | 'char'
 // 常量定义 ConstDef → Ident [ '[' ConstExp ']' ] '=' ConstInitVal // k
-// 常量初值 ConstInitVal → ConstExp | '{' [ ConstExp { ',' ConstExp } ] '}'
+// 常量初值 ConstInitVal → ConstExp | '{' [ ConstExp { ',' ConstExp } ] '}' | StringConst
 // 变量声明 VarDecl → [ 'static' ] BType VarDef { ',' VarDef } ';' // i
 // 变量定义 VarDef → Ident [ '[' ConstExp ']' ] | Ident [ '[' ConstExp ']' ] '=' InitVal // k
-// 变量初值 InitVal → Exp | '{' [ Exp { ',' Exp } ] '}'
+// 变量初值 InitVal → Exp | '{' [ Exp { ',' Exp } ] '}' | StringConst
 // 函数定义 FuncDef → FuncType Ident '(' [FuncFParams] ')' Block // j
 // 主函数定义 MainFuncDef → 'int' 'main' '(' ')' Block // j
 // 函数类型 FuncType → 'void' | 'int' | 'char'
@@ -22,6 +22,7 @@
 // | 'switch' '(' Exp ')' '{' { CaseStmt } '}' // j
 // | 'break' ';' | 'continue' ';' // i
 // | 'return' [Exp] ';' // i
+// | 'printf' '(' StringConst { ',' Exp } ')' ';' // e, l
 // Case语句 CaseStmt → 'case' Number ':' { Stmt } | 'default' ':' { Stmt }
 // 表达式 Exp → AddExp
 // 条件表达式 Cond → LOrExp
@@ -51,7 +52,9 @@ const char * ParTokenKindName(int kind){
 }
 Parser::Parser(const vector<LexToken> & lexTokenList,ErrorController * errorController):
     lexTokenList(lexTokenList),
-    errorController(errorController){}
+    errorController(errorController),
+    curPos(0)
+    {}
 
 ParToken * Parser::scan_parser(){
     return parse_CompUnit();
@@ -136,7 +139,7 @@ ParToken * Parser::parse_CompUnit(){
     return node;
 }
 bool Parser::is_Decl_ahead(){    //所有is开头的判断均为    "可能是"!!!
-    //严格来说,是,当前场景下,可以靠is函数检查,而不会导致FIRST的混淆
+    //严格来说,是当前场景下,可以靠is函数检查,而不会导致FIRST的混淆
     if(check_any({CONSTTK,STATICTK})||check_Btype()) 
         return !is_FuncDef_ahead()&&!is_MainFunDef_ahead();
     return false;
@@ -202,7 +205,7 @@ ParToken * Parser::parse_ConstDef(){
     node->add(parse_ConstInitVal());
     return node;
 }
-// 常量初值 ConstInitVal → ConstExp | '{' [ ConstExp { ',' ConstExp } ] '}'
+// 常量初值 ConstInitVal → ConstExp | '{' [ ConstExp { ',' ConstExp } ] '}' | StringConst
 ParToken * Parser::parse_ConstInitVal(){
     ParToken * node = make_ParToken(ConstInitVal);
     if(check(LBRACE)){
@@ -214,8 +217,13 @@ ParToken * Parser::parse_ConstInitVal(){
                 node->add(parse_ConstExp());
             }
         }
+        match(node,RBRACE);
+    }else if(check(STRCON)){
+        match(node,STRCON);
+    }else{
+         node->add(parse_ConstExp());       
     }
-    match(node,RBRACE);
+
     return node;
 }
 bool Parser::is_any_Exp_ahead(){   //所有的Exp,包括Cond和FuncRParams,除了Primary_Exp
@@ -253,12 +261,13 @@ ParToken * Parser::parse_VarDef(){
     }
     return node;
 }
-// 变量初值 InitVal → Exp | '{' [ Exp { ',' Exp } ] '}'
+// 变量初值 InitVal → Exp | '{' [ Exp { ',' Exp } ] '}' | StringConst
 ParToken * Parser::parse_InitVal(){
     ParToken * node = make_ParToken(InitVal);
     if(check(LBRACE)){
         match(node,LBRACE);
         if(is_any_Exp_ahead()){
+            node->add(parse_Exp());
             while (check(COMMA))
             {
                 match(node,COMMA);
@@ -266,6 +275,8 @@ ParToken * Parser::parse_InitVal(){
             }
         }
         match(node,RBRACE);
+    }else if(check(STRCON)){
+        match(node,STRCON);
     }else {
         node->add(parse_Exp());
     }
@@ -333,10 +344,9 @@ ParToken * Parser::parse_FuncFParam(){
 ParToken * Parser::parse_Block(){
     ParToken * node = make_ParToken(Block);
     match(node,LBRACE);
-    if(!check(RBRACE)){    //这里取了个巧,真的不太想写这个的is_ahead(等到Stmt再搞吧)
+    while(is_Stmt_ahead()||is_Decl_ahead()){    
         node->add(parse_BlockItem());
     }
-    node->add(parse_BlockItem());
     match(node,RBRACE);
     return node;
 }
@@ -359,11 +369,12 @@ ParToken * Parser::parse_BlockItem(){
 // | 'switch' '(' Exp ')' '{' { CaseStmt } '}' // j
 // | 'break' ';' | 'continue' ';' // i
 // | 'return' [Exp] ';' // i
+// | 'printf' '(' StringConst { ',' Exp } ')' ';' // e, l
 ParToken * Parser::parse_Stmt(){
     ParToken * node = make_ParToken(Stmt);
     if(check(IDENFR)){
 
-        match(node,IDENFR);
+        node->add(parse_LVal());
         match(node,ASSIGN);
         node->add(parse_Exp());
         match(node,SEMICN);
@@ -386,6 +397,7 @@ ParToken * Parser::parse_Stmt(){
         match(node,IFTK);
         match(node,LPARENT);
         node->add(parse_Cond());
+        match(node,RPARENT);
         node->add(parse_Stmt());
         if(check(ELSETK)){
             match(node,ELSETK);
@@ -435,6 +447,19 @@ ParToken * Parser::parse_Stmt(){
         }
         match(node,SEMICN);
 
+    }else if(check(PRINTFTK)){
+
+        match(node,PRINTFTK);
+        match(node,LPARENT);
+        match(node,STRCON);
+        while (check(COMMA))
+        {
+            match(node,COMMA);
+            node->add(parse_Exp());
+        }
+        match(node,RPARENT);
+        match(node,SEMICN);
+
     }
     return node;
 }
@@ -442,7 +467,7 @@ ParToken * Parser::parse_Stmt(){
 
 
 bool Parser::is_Stmt_ahead(){  //应该是没有重合
-    return is_any_Exp_ahead()||check_any({IDENFR,SEMICN,LBRACE,IFTK,WHILETK,SWITCHTK,BREAKTK,CONTINUETK,RETURNTK});
+    return is_any_Exp_ahead()||check_any({IDENFR,SEMICN,LBRACE,IFTK,WHILETK,SWITCHTK,BREAKTK,CONTINUETK,RETURNTK,PRINTFTK});
 }//按顺序的呀
 
 
@@ -462,6 +487,7 @@ ParToken * Parser::parse_CaseStmt(){
     match(node,COLON);
     while (is_Stmt_ahead())
     {
+        printf("--------------------->\n");
         node->add(parse_Stmt());
     }
     return node;
@@ -526,7 +552,7 @@ ParToken * Parser::parse_UnaryExp(){
         node->add(parse_UnaryExp());
     }else if(is_PLUS_MINU_NOT_ahead()){
         node->add(parse_UnaryOp());
-    }else if(check(IDENFR)){
+    }else if(is_FuncCall_ahead()){
         match(node,IDENFR);
         match(node,LPARENT);
         if(is_any_Exp_ahead()){   //饿啊,这个东西包括FRP

@@ -4,6 +4,7 @@
 using namespace std;
 #include "enums.h"
 #include <vector>
+#include <cstdio>
 struct Error {
     errorKind type;
     int lineNum;
@@ -24,6 +25,7 @@ struct ParToken{
         this->childs.push_back(token);
         return this;
     }
+    
 };
 
 

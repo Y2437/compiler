@@ -10,11 +10,12 @@ int main() {      //优雅,永不过时
     if(ONLINE_JUDGE){
         in = fopen("testfile.txt", "r");
         err = fopen("error.txt", "w");
-        out = fopen("lexer.txt", "w");
+        out = fopen("parser.txt", "w");
     }
     CompilerManager manager=CompilerManager(in,out,err);
     manager.scan_source();
     manager.scan_lexer();
+    manager.scan_parser();
     manager.debug_report_parser();
     return 0;
 }

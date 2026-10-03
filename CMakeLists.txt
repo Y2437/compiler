@@ -9,5 +9,6 @@ add_executable(Compiler
         src/main.cpp
         src/error/errorController.cpp
         src/manager/manager.cpp
+        src/parser/parser.cpp
 )
 target_compile_options(Compiler PRIVATE -Wall -Wextra)

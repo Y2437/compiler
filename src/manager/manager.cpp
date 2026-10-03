@@ -30,18 +30,28 @@ void CompilerManager::debug_report_lexer(){
 void CompilerManager::debug_report_parser(){
     report_parser_tool(parTreeRoot);
 }
+
 void CompilerManager::report_parser_tool(ParToken * node){
-    printf("%s %s\n",LexTokenKindName(node->lexToken->tokenType),node->lexToken->raw_string.c_str());
+    
     if(node->type!=Leaf) {
         for (auto & child : node->childs)
         {
             report_parser_tool(child);   
         }
-        printf("%s\n",ParTokenKindName(node->type));
+        //除了<BlockItem>, <Decl>, <BType> 之外
+        if(node->type!=BlockItem&&node->type!=Decl&&node->type!=BType)
+            fprintf(out,"%s\n",ParTokenKindName(node->type));
+    }else{
+
+        fprintf(out,"%s %s\n",LexTokenKindName(node->lexToken->tokenType)
+        ,node->lexToken->raw_string.c_str());
     }
 
 }
 void CompilerManager::scan_parser(){
+    if(errorController.has_error()){
+        report_error();
+    }
     parTreeRoot=parser.scan_parser();
 }
 
