@@ -52,7 +52,6 @@ void CompilerManager::report_parser_tool(ParToken * node){
 
 }
 void CompilerManager::scan_parser(){
-
     parTreeRoot=parser.scan_parser();
 }
 
